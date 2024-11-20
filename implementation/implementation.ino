@@ -4,6 +4,7 @@
 int COMMON_DELAY = 1500;
 int BATTERY_PUSH_TIME = 10500;
 int DRONE_MOVE_TIME = 7000;
+int VERY_BIG_ACTUATORS_WORK_TIME = 20000;
 
 enum Actuators {
   BATTERY_SWAPER_ACTUATOR_RIGHT,
@@ -36,40 +37,32 @@ void setup() {
   initilization();
 }
 
-// void actuator_work(Actuators actuator_number, int work_time) {
-//   digitalWrite(uno_dgt_pins[actuator_number][IN1], HIGH);
-//   digitalWrite(uno_dgt_pins[actuator_number][IN2], LOW);
-//   delay(BATTRY_PUSH_TIME);
-
-//   delay(COMMON_DELAY);
-
-//   digitalWrite(uno_dgt_pins[actuator_number][IN1], LOW);
-//   digitalWrite(uno_dgt_pins[actuator_number][IN2], HIGH);
-//   delay(BATTRY_PUSH_TIME);
-
-//   digitalWrite(uno_dgt_pins[actuator_number][IN1], LOW);
-//   digitalWrite(uno_dgt_pins[actuator_number][IN2], LOW);
-// }
-
-void actuator_stop(Actuators actuator_number) {
-  digitalWrite(uno_dgt_pins[actuator_number][IN1], LOW);
-  digitalWrite(uno_dgt_pins[actuator_number][IN2], LOW);
+void actuator_stop(Actuators actuator) {
+  digitalWrite(uno_dgt_pins[actuator][IN1], LOW);
+  digitalWrite(uno_dgt_pins[actuator][IN2], LOW);
 }
 
-void actuator_push(Actuators actuator_number, int time) {
-  digitalWrite(uno_dgt_pins[actuator_number][IN1], HIGH);
-  digitalWrite(uno_dgt_pins[actuator_number][IN2], LOW);
-  delay(time);
-
-  actuator_stop(actuator_number);
+void all_actuators_stop() {
+  actuator_stop(BATTERY_SWAPER_ACTUATOR_RIGHT);
+  actuator_stop(BATTERY_SWAPER_ACTUATOR_LEFT);
+  actuator_stop(DRONE_MOVER_ACTUATOR_LONG);
+  actuator_stop(DRONE_MOVER_ACTUATOR_WIDTH);
 }
 
-void actuator_pull(Actuators actuator_number, int time) {
-  digitalWrite(uno_dgt_pins[actuator_number][IN1], LOW);
-  digitalWrite(uno_dgt_pins[actuator_number][IN2], HIGH);
+void actuator_push(Actuators actuator, int time) {
+  digitalWrite(uno_dgt_pins[actuator][IN1], HIGH);
+  digitalWrite(uno_dgt_pins[actuator][IN2], LOW);
   delay(time);
 
-  actuator_stop(actuator_number);
+  actuator_stop(actuator);
+}
+
+void actuator_pull(Actuators actuator, int time) {
+  digitalWrite(uno_dgt_pins[actuator][IN1], LOW);
+  digitalWrite(uno_dgt_pins[actuator][IN2], HIGH);
+  delay(time);
+
+  actuator_stop(actuator);
 }
 
 void move_drone_to_station() {
@@ -78,21 +71,18 @@ void move_drone_to_station() {
   actuator_push(DRONE_MOVER_ACTUATOR_WIDTH, DRONE_MOVE_TIME);
 }
 
-void reset_actuator(Actuators actuator_number, int time) {
-  digitalWrite(uno_dgt_pins[actuator_number][IN1], LOW);
-  digitalWrite(uno_dgt_pins[actuator_number][IN2], HIGH);
-  delay(time);
-
-  actuator_stop(actuator_number);
+void reset_actuator(Actuators actuator) {
+  digitalWrite(uno_dgt_pins[actuator][IN1], LOW);
+  digitalWrite(uno_dgt_pins[actuator][IN2], HIGH);
 }
 
-void all_actuators_reset(int iteration) {
-  reset_actuator(DRONE_MOVER_ACTUATOR_LONG, DRONE_MOVE_TIME);
-  reset_actuator(DRONE_MOVER_ACTUATOR_WIDTH, DRONE_MOVE_TIME);
+void all_actuators_pull(int iteration) {
+  reset_actuator(DRONE_MOVER_ACTUATOR_LONG);
+  reset_actuator(DRONE_MOVER_ACTUATOR_WIDTH);
   if (iteration % 2 == 0) {
-    reset_actuator(BATTERY_SWAPER_ACTUATOR_RIGHT, BATTERY_PUSH_TIME);
+    reset_actuator(BATTERY_SWAPER_ACTUATOR_RIGHT);
   } else {
-    reset_actuator(BATTERY_SWAPER_ACTUATOR_LEFT, BATTERY_PUSH_TIME);
+    reset_actuator(BATTERY_SWAPER_ACTUATOR_LEFT);
   }
 }
 
@@ -112,8 +102,10 @@ void loop() {
     swap_battery(i);
     delay(COMMON_DELAY);
 
-    all_actuators_reset(i);
-    delay(COMMON_DELAY);
+    all_actuators_pull(i);
+    delay(VERY_BIG_ACTUATORS_WORK_TIME);
+
+    all_actuators_stop();
 
     i = (i + 1) % 2;
   }
