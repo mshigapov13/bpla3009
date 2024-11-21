@@ -4,9 +4,11 @@
 int COMMON_DELAY = 1500;
 int HEALTH_CHECK_TIME = 1500;
 
+// ======== параметры работы актуаторов, которые можно настраивать ========
 int BATTERY_PUSH_TIME = 10500;
 int MAX_ACTUATOR_WORK_TIME = 7000;
 int VERY_BIG_ACTUATORS_WORK_TIME = 25000;
+// ========================================================================
 
 enum Actuators {
   BATTERY_SWAPER_ACTUATOR_RIGHT,
