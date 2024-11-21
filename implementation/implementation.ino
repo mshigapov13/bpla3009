@@ -2,6 +2,8 @@
 #define ACTUATORS_CONTROL_PINS_COUNT 2
 
 int COMMON_DELAY = 1500;
+int HEALTH_CHECK_TIME = 1500;
+
 int BATTERY_PUSH_TIME = 10500;
 int MAX_ACTUATOR_WORK_TIME = 7000;
 int VERY_BIG_ACTUATORS_WORK_TIME = 25000;
@@ -49,9 +51,13 @@ void all_actuators_stop() {
   actuator_stop(DRONE_MOVER_ACTUATOR_WIDTH);
 }
 
-void actuator_push_and_stop(Actuators actuator, int time) {
+void actuator_push(Actuators actuator) {
   digitalWrite(uno_dgt_pins[actuator][IN1], HIGH);
   digitalWrite(uno_dgt_pins[actuator][IN2], LOW);
+}
+
+void actuator_push_and_stop(Actuators actuator, int time) {
+  actuator_push(actuator);
   delay(time);
 
   actuator_stop(actuator);
@@ -86,7 +92,7 @@ void swap_battery(int iteration) {
 }
 
 void loop() {
-health
+  healthcheck();
 
   for (int i;;) {
     delay(COMMON_DELAY);
@@ -102,4 +108,20 @@ health
 
     i = (i + 1) % 2;
   }
+}
+
+void healthcheck() {
+  actuator_push(BATTERY_SWAPER_ACTUATOR_RIGHT);
+  actuator_push(BATTERY_SWAPER_ACTUATOR_LEFT);
+  actuator_push(DRONE_MOVER_ACTUATOR_LONG);
+  actuator_push(DRONE_MOVER_ACTUATOR_WIDTH);
+  delay(HEALTH_CHECK_TIME);
+  all_actuators_stop();
+
+  actuator_pull(BATTERY_SWAPER_ACTUATOR_RIGHT);
+  actuator_pull(BATTERY_SWAPER_ACTUATOR_LEFT);
+  actuator_pull(DRONE_MOVER_ACTUATOR_LONG);
+  actuator_pull(DRONE_MOVER_ACTUATOR_WIDTH);
+  delay(HEALTH_CHECK_TIME);
+  all_actuators_stop();
 }
