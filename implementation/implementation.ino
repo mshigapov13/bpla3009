@@ -3,6 +3,7 @@
 
 int COMMON_DELAY = 1500;
 int HEALTH_CHECK_TIME = 1500;
+int BATTERY_SWAP_ITERATION = 0;
 
 // ======== параметры работы актуаторов, которые можно настраивать ========
 int BATTERY_PUSH_TIME = 10500;
@@ -39,6 +40,7 @@ void initilization() {
 
 void setup() {
   initilization();
+  healthcheck();
 }
 
 void actuator_stop(Actuators actuator) {
@@ -94,22 +96,18 @@ void swap_battery(int iteration) {
 }
 
 void loop() {
-  healthcheck();
+  delay(COMMON_DELAY);
+  move_drone_to_station();
+  delay(COMMON_DELAY);
 
-  for (int i;;) {
-    delay(COMMON_DELAY);
-    move_drone_to_station();
-    delay(COMMON_DELAY);
+  swap_battery(BATTERY_SWAP_ITERATION);
+  delay(COMMON_DELAY);
 
-    swap_battery(i);
-    delay(COMMON_DELAY);
+  all_actuators_pull(BATTERY_SWAP_ITERATION);
+  delay(VERY_BIG_ACTUATORS_WORK_TIME);
+  all_actuators_stop();
 
-    all_actuators_pull(i);
-    delay(VERY_BIG_ACTUATORS_WORK_TIME);
-    all_actuators_stop();
-
-    i = (i + 1) % 2;
-  }
+  BATTERY_SWAP_ITERATION = (BATTERY_SWAP_ITERATION + 1) % 2;
 }
 
 void healthcheck() {
